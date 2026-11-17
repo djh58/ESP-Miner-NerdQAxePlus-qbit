@@ -25,6 +25,7 @@
 #include "nvs_config.h"
 #include "displayDriver.h"
 #include "qbit_screens.h"
+#include "esp_heap_caps.h"
 
 #pragma GCC diagnostic ignored "-Wmissing-field-initializers"
 
@@ -370,19 +371,18 @@ bool DisplayDriver::enterState(UiState s, int64_t now)
             // Building a whole screen: hold the lock the system task takes
             // for its label updates.
             PThreadGuard lock(m_lvglMutex);
-            // LVGL's out-of-memory handler never returns, so check that the
-            // screen fits before building it and stay on mining if it does not.
-            lv_mem_monitor_t mon;
-            lv_mem_monitor(&mon);
-            fits = m_ui->ui_qbitPoolScreen || mon.free_biggest_size >= 12 * 1024;
+            // LVGL allocates from PSRAM (LV_MEM_CUSTOM in the top-level
+            // CMakeLists.txt) and its out-of-memory handler never returns, so
+            // check that the screen fits before building it.
+            size_t largest = heap_caps_get_largest_free_block(MALLOC_CAP_SPIRAM);
+            fits = m_ui->ui_qbitPoolScreen || largest >= 64 * 1024;
             if (fits) {
                 lv_obj_t *screen = QbitScreens::createPoolScreen(*m_ui);
                 QbitScreens::fillPoolScreen(*m_ui, QBIT_POOL.getView());
                 enableLvglAnimations(true);
                 safe_screen_change(screen, LV_SCR_LOAD_ANIM_MOVE_LEFT, 350, 0);
             } else {
-                ESP_LOGW(TAG, "not enough LVGL memory for the qbit pool screen (%u bytes)",
-                         (unsigned) mon.free_biggest_size);
+                ESP_LOGW(TAG, "not enough PSRAM for the qbit pool screen (%u bytes)", (unsigned) largest);
             }
         }
         if (!fits) {

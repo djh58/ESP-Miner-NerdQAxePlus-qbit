@@ -261,10 +261,5 @@ int main(int argc, char **argv)
         if (toast) QbitScreens::hideBlockToast(ui);
     }
 
-    lv_mem_monitor_t mon;
-    lv_mem_monitor(&mon);
-    fprintf(stderr, "LVGL pool: %u of %u bytes used (%u%%), largest free block %u\n",
-            (unsigned) (mon.total_size - mon.free_size), (unsigned) mon.total_size, mon.used_pct,
-            (unsigned) mon.free_biggest_size);
     return failures ? 1 : 0;
 }

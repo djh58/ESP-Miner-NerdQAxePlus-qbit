@@ -8,11 +8,10 @@
 #define LV_COLOR_DEPTH 16
 #define LV_COLOR_16_SWAP 1 // CONFIG_LV_COLOR_16_SWAP=y
 
-// The device uses LVGL's built-in pool at the size sdkconfig.defaults sets
-// (CONFIG_LV_MEM_SIZE_KILOBYTES), so a screen that runs out of LVGL memory
-// here would run out on the miner too. Keep the two in step.
-#define LV_MEM_CUSTOM 0
-#define LV_MEM_SIZE (48U * 1024U)
+// The firmware's top-level CMakeLists.txt makes LVGL allocate from PSRAM
+// (LV_MEM_CUSTOM with lv_psram_alloc), overriding the Kconfig pool, so the
+// simulator uses the heap as well.
+#define LV_MEM_CUSTOM 1
 
 #define LV_USE_SNAPSHOT 1 // CONFIG_LV_USE_SNAPSHOT=y
 

@@ -3,8 +3,8 @@
 Renders the miner's screens on a desktop from the firmware's own UI sources
 (`main/displays/ui.cpp`, theme images, fonts) and LVGL 8.3.11, the release
 pinned in `main/idf_component.yml`. ESP-IDF and board headers are replaced by
-small stand-ins in `stubs/`. The LVGL memory pool matches the device's 32 KB,
-so the summary line it prints shows how much room new screens have left.
+small stand-ins in `stubs/`. Like the firmware, LVGL allocates from the heap
+(the firmware's top-level CMakeLists.txt points it at PSRAM).
 
 Build (needs CMake, a C++17 compiler, zlib; SDL2 for the window):
 

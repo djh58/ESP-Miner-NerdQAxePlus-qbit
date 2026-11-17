@@ -11,9 +11,6 @@ CONFIG_HTTPD_MAX_URI_LEN=2048
 CONFIG_LV_FONT_MONTSERRAT_10=y
 CONFIG_LV_FONT_MONTSERRAT_14=y
 CONFIG_LV_COLOR_16_SWAP=y
-# qbit edition: room for the qbit pool screen and block toast (upstream screens
-# use ~27 KB of the default 32 KB); costs 16 KB of internal RAM.
-CONFIG_LV_MEM_SIZE_KILOBYTES=48
 # qbit edition: /api/v2/display/screenshot
 CONFIG_LV_USE_SNAPSHOT=y
 
