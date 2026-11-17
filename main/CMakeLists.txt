@@ -107,6 +107,8 @@ SRCS
     "./displays/images/themes/themes.c"
     "./otp/otp.cpp"
     "./otp/qrcodegen.cpp"
+    "./qbit/qbit_address.cpp"
+    "./qbit/qbit_chain.cpp"
 
 
 
@@ -117,6 +119,7 @@ INCLUDE_DIRS
     "http_server/v2"
     "displays"
     "displays/images"
+    "qbit"
     "boards"
     "boards/drivers"
     "network"
