@@ -22,13 +22,12 @@
     "fanMode": 2,
     "fanSpeedPercent": 60
   },
-  "price": { "usd": 64442 },
   "network": {
-    "blockHeight": 976212,
-    "hashrateHps": 964605107254170200000,
-    "difficulty": 134823837323272.7,
-    "feeLow": 1,
-    "feeMid": 1,
-    "feeHigh": 1
+    "qbit": true,
+    "priceUsd": null,
+    "blockHeight": 178805,
+    "hashrateHps": 86415836911458600,
+    "difficulty": 1348860090.875964,
+    "fees": { "hour": 1, "halfHour": 1, "fastest": 1 }
   }
 }

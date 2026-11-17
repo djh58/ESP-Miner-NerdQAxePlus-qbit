@@ -109,6 +109,8 @@ SRCS
     "./otp/qrcodegen.cpp"
     "./qbit/qbit_address.cpp"
     "./qbit/qbit_chain.cpp"
+    "./qbit/explorer_parse.cpp"
+    "./displays/qbit_screens.cpp"
 
 
 

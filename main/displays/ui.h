@@ -86,6 +86,11 @@ protected:
     lv_obj_t *ui_PowerOffScreen = nullptr;
     lv_obj_t* ui_imgNet = nullptr;
 
+    // qbit edition widgets, created and filled by QbitScreens (qbit_screens.cpp)
+    lv_obj_t *ui_qbitUnitMask = nullptr;
+    lv_obj_t *ui_qbitUnit = nullptr;
+    lv_obj_t *ui_qbitStepMask = nullptr;
+
     Board* m_board;
     Theme* m_theme;
     DisplayDriver *m_display;
@@ -131,5 +136,6 @@ public:
     void hideErrorOverlay();
 
     friend class DisplayDriver;
+    friend class QbitScreens;
 };
 

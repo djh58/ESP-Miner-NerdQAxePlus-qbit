@@ -3,6 +3,7 @@
 #include "ui.h"
 
 #include "displayDriver.h"
+#include "qbit_screens.h"
 #include "esp_log.h"
 #include "esp_timer.h"
 #include "../macros.h"
@@ -953,6 +954,7 @@ void UI::init(Board* board, DisplayDriver *display)
     settingsScreenInit();
     bTCScreenInit();
     globalStatsScreenInit();
+    QbitScreens::initGlobalStats(*this);
     // ui_LogScreen_init();
 
     lv_disp_load_scr(ui_Splash1);

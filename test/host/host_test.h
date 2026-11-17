@@ -30,3 +30,4 @@ extern int g_checks;
 
 void test_qbit_chain();
 void test_qbit_address();
+void test_explorer_parse();

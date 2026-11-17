@@ -42,6 +42,7 @@ target_compile_options(lvgl_sim PRIVATE -w)
 # the real ui.cpp compiles unchanged. configure_file re-runs on every change.
 set(STAGE ${CMAKE_BINARY_DIR}/stage)
 foreach(f displays/ui.cpp displays/ui.h displays/ui_helpers.cpp displays/ui_helpers.h
+          displays/qbit_screens.cpp displays/qbit_screens.h
           otp/qrcodegen.h macros.h)
     configure_file(${FW_MAIN}/${f} ${STAGE}/${f} COPYONLY)
 endforeach()
@@ -59,6 +60,7 @@ add_executable(nerdqaxe-sim
     src/esp_stubs.cpp
     ${STAGE}/displays/ui.cpp
     ${STAGE}/displays/ui_helpers.cpp
+    ${STAGE}/displays/qbit_screens.cpp
     ${FW_MAIN}/otp/qrcodegen.cpp
     ${FW_MAIN}/displays/images/themes/themes.c
     ${FW_FONTS_AND_ICONS}
@@ -70,6 +72,7 @@ target_include_directories(nerdqaxe-sim PRIVATE
     ${STAGE}
     ${FW_MAIN}/displays/images/themes
     ${FW_MAIN}/displays
+    ${FW_MAIN}/qbit
     ${FW_MAIN}
     ${FW_COMPONENTS}/arduinojson)
 target_compile_definitions(nerdqaxe-sim PRIVATE NERDQAXE_SIM=1)

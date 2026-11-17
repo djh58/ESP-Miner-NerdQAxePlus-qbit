@@ -57,14 +57,19 @@ bool load_scenario(const std::string &path, SimScenario &s, std::string &error)
     read(st, "fanMode", s.fanMode);
     read(st, "fanSpeedPercent", s.fanSpeedPercent);
 
-    read(doc["price"].as<JsonVariantConst>(), "usd", s.priceUsd);
-
     JsonVariantConst n = doc["network"];
-    read(n, "blockHeight", s.blockHeight);
-    read(n, "hashrateHps", s.netHashrateHps);
-    read(n, "difficulty", s.netDifficulty);
-    read(n, "feeLow", s.feeLow);
-    read(n, "feeMid", s.feeMid);
-    read(n, "feeHigh", s.feeHigh);
+    NetworkStats &ns = s.network;
+    read(n, "qbit", ns.qbit);
+    ns.priceKnown = !n["priceUsd"].isNull();
+    read(n, "priceUsd", ns.priceUsd);
+    ns.heightKnown = !n["blockHeight"].isNull();
+    read(n, "blockHeight", ns.blockHeight);
+    ns.hashrateKnown = !n["hashrateHps"].isNull() && !n["difficulty"].isNull();
+    read(n, "hashrateHps", ns.hashrate);
+    read(n, "difficulty", ns.difficulty);
+    ns.feesKnown = !n["fees"].isNull();
+    read(n["fees"], "hour", ns.feeHour);
+    read(n["fees"], "halfHour", ns.feeHalfHour);
+    read(n["fees"], "fastest", ns.feeFastest);
     return true;
 }

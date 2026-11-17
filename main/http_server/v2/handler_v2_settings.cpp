@@ -252,6 +252,9 @@ esp_err_t PATCH_V2_settings(httpd_req_t *req)
     if (doc["mempoolUrl"].is<const char*>()) {
         Config::setMempoolUrl(doc["mempoolUrl"].as<const char*>());
     }
+    if (doc["mempoolCustom"].is<bool>() || doc["mempoolUrl"].is<const char*>()) {
+        APIs_FETCHER.sourceChanged();
+    }
     if (doc["invertFanPolarity"].is<bool>()) {
         Config::setFanPolarity(doc["invertFanPolarity"].as<bool>());
     }

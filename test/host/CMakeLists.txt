@@ -10,7 +10,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(FW_MAIN ${CMAKE_CURRENT_SOURCE_DIR}/../../main)
 file(GLOB QBIT_SOURCES CONFIGURE_DEPENDS ${FW_MAIN}/qbit/*.cpp)
 
-add_executable(qbit_host_tests test_main.cpp test_qbit_chain.cpp test_qbit_address.cpp ${QBIT_SOURCES})
+add_executable(qbit_host_tests test_main.cpp test_qbit_chain.cpp test_qbit_address.cpp test_explorer_parse.cpp
+               ${QBIT_SOURCES})
 target_include_directories(qbit_host_tests PRIVATE ${FW_MAIN}/qbit ${FW_MAIN}/../components/arduinojson
                            ${CMAKE_CURRENT_SOURCE_DIR})
 target_compile_options(qbit_host_tests PRIVATE -Wall -Wextra)
+target_compile_definitions(qbit_host_tests PRIVATE FIXTURE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/fixtures")

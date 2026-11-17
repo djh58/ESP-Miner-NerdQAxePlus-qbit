@@ -24,6 +24,7 @@
 
 #include "nvs_config.h"
 #include "displayDriver.h"
+#include "qbit_screens.h"
 
 #pragma GCC diagnostic ignored "-Wmissing-field-initializers"
 
@@ -432,7 +433,8 @@ void DisplayDriver::updateState(int64_t now, bool btn1Press, bool btn2Press, boo
             break;
         }
         if (btn1Press) {
-            enterState(UiState::BTCScreen, now);
+            // qbit explorers have no price feed, so skip the price screen.
+            enterState(APIs_FETCHER.getStats().qbit ? UiState::GlobalStats : UiState::BTCScreen, now);
             APIs_FETCHER.enableFetching();
         }
         break;
@@ -953,48 +955,13 @@ void DisplayDriver::updateCurrentSettings(int pool)
 
 void DisplayDriver::updateBTCprice(void)
 {
-    char price_str[32];
-
-    if ((m_state != UiState::BTCScreen) && (m_btcPrice != 0))
-        return;
-
-    m_btcPrice = APIs_FETCHER.getPrice();
-    snprintf(price_str, sizeof(price_str), "%u$", m_btcPrice);
-    lv_label_set_text(m_ui->ui_lblBTCPrice, price_str); // Update label
+    QbitScreens::fillPrice(*m_ui, APIs_FETCHER.getStats());
 }
 
 void DisplayDriver::updateGlobalMiningStats(void)
 {
-    char strData[32];
-
-    if ((m_state != UiState::GlobalStats) && (m_blockHeight != 0))
-        return;
-
-
-    m_blockHeight = APIs_FETCHER.getBlockHeight();
-    snprintf(strData, sizeof(strData), "%lu", m_blockHeight);
-    lv_label_set_text(m_ui->ui_lblBlock, strData); // Update label
-
-    snprintf(strData, sizeof(strData), "%lu", APIs_FETCHER.getBlocksToHalving());
-    lv_label_set_text(m_ui->ui_lblBlocksToHalving, strData); // Update label
-
-    snprintf(strData, sizeof(strData), "%lu%%", APIs_FETCHER.getHalvingPercent());
-    lv_label_set_text(m_ui->ui_lblHalvingPercent, strData); // Update label
-
-    snprintf(strData, sizeof(strData), "%llu", APIs_FETCHER.getNetHash());
-    lv_label_set_text(m_ui->ui_lblGlobalHash, strData); // Update label
-
-    snprintf(strData, sizeof(strData), "%lluT", APIs_FETCHER.getNetDifficulty());
-    lv_label_set_text(m_ui->ui_lblDifficulty, strData); // Update label
-
-    snprintf(strData, sizeof(strData), "%lu", APIs_FETCHER.getLowestFee());
-    lv_label_set_text(m_ui->ui_lbllowFee, strData); // Update label
-
-    snprintf(strData, sizeof(strData), "%lu", APIs_FETCHER.getMidFee());
-    lv_label_set_text(m_ui->ui_lblmedFee, strData); // Update label
-
-    snprintf(strData, sizeof(strData), "%lu", APIs_FETCHER.getFastestFee());
-    lv_label_set_text(m_ui->ui_lblhighFee, strData); // Update label
+    // Bitcoin explorers keep the upstream layout; qbit shows its own.
+    QbitScreens::fillGlobalStats(*m_ui, APIs_FETCHER.getStats());
 }
 
 void DisplayDriver::updateGlobalState(int pool)

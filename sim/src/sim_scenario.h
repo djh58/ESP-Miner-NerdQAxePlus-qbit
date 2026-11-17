@@ -2,6 +2,8 @@
 #include <stdint.h>
 #include <string>
 
+#include "network_stats.h"
+
 // Everything the screens show, as the firmware's modules would report it.
 // Field names follow /api/system/info where there is an equivalent.
 struct SimScenario {
@@ -29,16 +31,9 @@ struct SimScenario {
     int fanMode = 0; // 0 manual, 1 legacy auto, 2 PID
     int fanSpeedPercent = 0;
 
-    // Price screen
-    uint32_t priceUsd = 0;
-
-    // Global stats screen, as the explorer fetcher stores them
-    uint32_t blockHeight = 0;
-    double netHashrateHps = 0;
-    double netDifficulty = 0;
-    uint32_t feeLow = 0;
-    uint32_t feeMid = 0;
-    uint32_t feeHigh = 0;
+    // Price and Global Stats screens: what the explorer fetcher would report.
+    // In the JSON a null or missing value is unknown.
+    NetworkStats network;
 };
 
 // Loads a scenario JSON file. Missing fields keep their defaults.

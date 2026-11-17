@@ -1,10 +1,12 @@
 // Puts scenario values into the screens. For the upstream screens this mirrors
 // DisplayDriver's update functions in main/displays/displayDriver.cpp; keep the
-// formats in step when those change.
+// formats in step when those change. The qbit edition's screens are filled by
+// the firmware's own QbitScreens code.
 #include <cstdio>
 #include <cstring>
 
 #include "displayDriver.h"
+#include "qbit_screens.h"
 #include "sim_scenario.h"
 
 namespace {
@@ -87,29 +89,9 @@ void DisplayDriver::fill(UI &ui, const SimScenario &s)
         setText(ui.ui_lbFanSet, str);
     }
 
-    // updateBTCprice
-    snprintf(str, sizeof(str), "%u$", s.priceUsd);
-    setText(ui.ui_lblBTCPrice, str);
-
-    // updateGlobalMiningStats, with the fetcher's Bitcoin conversions
-    const uint32_t halving = 210000;
-    uint32_t toHalving = ((s.blockHeight / halving) + 1) * halving - s.blockHeight;
-    snprintf(str, sizeof(str), "%u", s.blockHeight);
-    setText(ui.ui_lblBlock, str);
-    snprintf(str, sizeof(str), "%u", toHalving);
-    setText(ui.ui_lblBlocksToHalving, str);
-    snprintf(str, sizeof(str), "%u%%", (halving - toHalving) * 100 / halving);
-    setText(ui.ui_lblHalvingPercent, str);
-    snprintf(str, sizeof(str), "%llu", (unsigned long long) (s.netHashrateHps / 1e18));
-    setText(ui.ui_lblGlobalHash, str);
-    snprintf(str, sizeof(str), "%lluT", (unsigned long long) (s.netDifficulty / 1e12));
-    setText(ui.ui_lblDifficulty, str);
-    snprintf(str, sizeof(str), "%u", s.feeLow);
-    setText(ui.ui_lbllowFee, str);
-    snprintf(str, sizeof(str), "%u", s.feeMid);
-    setText(ui.ui_lblmedFee, str);
-    snprintf(str, sizeof(str), "%u", s.feeHigh);
-    setText(ui.ui_lblhighFee, str);
+    // updateBTCprice and updateGlobalMiningStats share the firmware's code.
+    QbitScreens::fillPrice(ui, s.network);
+    QbitScreens::fillGlobalStats(ui, s.network);
 }
 
 static const char *const kScreens[] = {"splash1", "splash2", "portal", "mining", "settings", "price", "global", nullptr};
