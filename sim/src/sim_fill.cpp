@@ -92,9 +92,13 @@ void DisplayDriver::fill(UI &ui, const SimScenario &s)
     // updateBTCprice and updateGlobalMiningStats share the firmware's code.
     QbitScreens::fillPrice(ui, s.network);
     QbitScreens::fillGlobalStats(ui, s.network);
+
+    // updatePayoutWarning
+    QbitScreens::setPayoutWarning(ui, qbit::check_stratum_user(s.stratumUser.c_str(), s.poolHost.c_str(), s.poolPort),
+                                  qbit::check_stratum_user(s.fallbackUser.c_str(), s.fallbackHost.c_str(), s.fallbackPort));
 }
 
-static const char *const kScreens[] = {"splash1", "splash2", "portal", "mining", "settings", "price", "global", nullptr};
+static const char *const kScreens[] = {"splash1", "splash2", "portal", "mining", "settings", "price", "global", "pool", "toast", nullptr};
 
 const char *const *DisplayDriver::screenNames() { return kScreens; }
 
@@ -107,5 +111,7 @@ lv_obj_t *DisplayDriver::screenByName(UI &ui, const char *name)
     if (!strcmp(name, "settings")) return ui.ui_SettingsScreen;
     if (!strcmp(name, "price")) return ui.ui_BTCScreen;
     if (!strcmp(name, "global")) return ui.ui_GlobalStats;
+    if (!strcmp(name, "pool")) return QbitScreens::createPoolScreen(ui);
+    if (!strcmp(name, "toast")) return ui.ui_MiningScreen;
     return nullptr;
 }

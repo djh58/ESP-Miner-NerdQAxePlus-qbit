@@ -20,7 +20,11 @@
     "frequencyMhz": 600,
     "asicVoltageMv": 1150,
     "fanMode": 2,
-    "fanSpeedPercent": 60
+    "fanSpeedPercent": 60,
+    "stratumUser": "bc1qexampleexampleexample.nerd",
+    "fallbackHost": "",
+    "fallbackPort": 0,
+    "fallbackUser": ""
   },
   "network": {
     "qbit": false,

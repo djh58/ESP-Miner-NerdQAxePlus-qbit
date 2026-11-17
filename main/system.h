@@ -178,6 +178,11 @@ class System {
         m_board = board;
     }
 
+    DisplayDriver *getDisplay()
+    {
+        return m_display;
+    }
+
     Board *getBoard()
     {
         return m_board;

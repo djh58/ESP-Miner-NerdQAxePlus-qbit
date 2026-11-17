@@ -955,6 +955,7 @@ void UI::init(Board* board, DisplayDriver *display)
     bTCScreenInit();
     globalStatsScreenInit();
     QbitScreens::initGlobalStats(*this);
+    QbitScreens::initPayoutWarning(*this);
     // ui_LogScreen_init();
 
     lv_disp_load_scr(ui_Splash1);

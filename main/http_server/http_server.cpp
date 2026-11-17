@@ -19,6 +19,7 @@
 #include "v2/handler_v2_settings.h"
 #include "v2/handler_v2_identify.h"
 #include "v2/handler_v2_system.h"
+#include "v2/handler_v2_display.h"
 #include "handler_system.h"
 #include "handler_wifi_scan.h"
 #include "handler_ota.h"
@@ -231,6 +232,13 @@ esp_err_t start_rest_server(void * pvParameters)
     httpd_uri_t v2_settings_options = {
         .uri = "/api/v2/settings", .method = HTTP_OPTIONS, .handler = handle_options_request, .user_ctx = NULL};
     httpd_register_uri_handler(http_server, &v2_settings_options);
+
+    httpd_uri_t v2_display_screenshot_get = {
+        .uri = "/api/v2/display/screenshot", .method = HTTP_GET, .handler = GET_V2_display_screenshot, .user_ctx = rest_context};
+    httpd_register_uri_handler(http_server, &v2_display_screenshot_get);
+    httpd_uri_t v2_display_button_post = {
+        .uri = "/api/v2/display/button", .method = HTTP_POST, .handler = POST_V2_display_button, .user_ctx = rest_context};
+    httpd_register_uri_handler(http_server, &v2_display_button_post);
 
     httpd_uri_t v2_identify_get = {
         .uri = "/api/v2/identify", .method = HTTP_GET, .handler = GET_V2_identify, .user_ctx = rest_context};

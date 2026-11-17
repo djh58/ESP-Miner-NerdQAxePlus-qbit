@@ -20,7 +20,11 @@
     "frequencyMhz": 600,
     "asicVoltageMv": 1150,
     "fanMode": 2,
-    "fanSpeedPercent": 60
+    "fanSpeedPercent": 60,
+    "stratumUser": "qb1zz2q6myu58k03q76zy8j0w4gkthcjt9kzmauq834339dmrl3d3ehqtjuhax.home",
+    "fallbackHost": "mine.prismpool.io",
+    "fallbackPort": 4335,
+    "fallbackUser": "qb1zz2q6myu58k03q76zy8j0w4gkthcjt9kzmauq834339dmrl3d3ehqtjuhax.home"
   },
   "network": {
     "qbit": true,
@@ -28,6 +32,21 @@
     "blockHeight": 178805,
     "hashrateHps": 86415836911458600,
     "difficulty": 1348860090.875964,
-    "fees": { "hour": 1, "halfHour": 1, "fastest": 1 }
+    "fees": {
+      "hour": 1,
+      "halfHour": 1,
+      "fastest": 1
+    }
+  },
+  "qbitPool": {
+    "address": "qb1zz2q6myu58k03q76zy8j0w4gkthcjt9kzmauq834339dmrl3d3ehqtjuhax",
+    "worker": "home",
+    "sinceFetchSeconds": 20,
+    "poolSummary": "../../test/host/fixtures/qbitpool-pool-summary.json",
+    "miner": "../../test/host/fixtures/qbitpool-miner.json"
+  },
+  "toast": {
+    "height": 178869,
+    "paidBits": 271804096
   }
 }

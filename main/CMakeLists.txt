@@ -110,7 +110,10 @@ SRCS
     "./qbit/qbit_address.cpp"
     "./qbit/qbit_chain.cpp"
     "./qbit/explorer_parse.cpp"
+    "./qbit/qbit_pool_parse.cpp"
+    "./tasks/qbit_pool_task.cpp"
     "./displays/qbit_screens.cpp"
+    "./http_server/v2/handler_v2_display.cpp"
 
 
 

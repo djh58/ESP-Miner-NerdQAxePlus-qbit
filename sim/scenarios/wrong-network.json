@@ -1,0 +1,41 @@
+{
+  "name": "wrong-network",
+  "mining": {
+    "hashrateGhs": 4822.0,
+    "powerW": 82.875,
+    "chipTempC": 56.25,
+    "fanRpm": 1878,
+    "currentMa": 6851,
+    "vinMv": 11843,
+    "vcoreMv": 1148,
+    "uptimeSeconds": 265,
+    "sharesAccepted": 18,
+    "sharesRejected": 1,
+    "bestDiff": "6.73M",
+    "ip": "192.168.1.174"
+  },
+  "settings": {
+    "poolHost": "pool.qbit.org",
+    "poolPort": 4335,
+    "frequencyMhz": 600,
+    "asicVoltageMv": 1150,
+    "fanMode": 2,
+    "fanSpeedPercent": 60,
+    "stratumUser": "tq1zx9588hlvcnqc928ytjkk7txkds3rve9hjwyuqlfm0yjqthzkfucqhrytw3.rig",
+    "fallbackHost": "mine.prismpool.io",
+    "fallbackPort": 4335,
+    "fallbackUser": ""
+  },
+  "network": {
+    "qbit": true,
+    "priceUsd": null,
+    "blockHeight": 178805,
+    "hashrateHps": 86415836911458600,
+    "difficulty": 1348860090.875964,
+    "fees": {
+      "hour": 1,
+      "halfHour": 1,
+      "fastest": 1
+    }
+  }
+}

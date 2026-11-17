@@ -16,6 +16,7 @@
 #include <vector>
 
 #include "displayDriver.h"
+#include "qbit_screens.h"
 #include "lvgl.h"
 #include "png_writer.h"
 #include "sim_clock.h"
@@ -95,8 +96,13 @@ int usage()
 #ifdef SIM_HAVE_SDL
 int run_window(UI &ui, SimScenario &scenario, const std::string &scenario_path, int scale)
 {
-    const char *cycle[] = {"mining", "settings", "price", "global"};
-    const int cycle_len = sizeof(cycle) / sizeof(cycle[0]);
+    // As on the device: qbit explorers skip the price screen, and the pool
+    // screen follows Global Stats when there is pool data.
+    std::vector<const char *> cycle = {"mining", "settings"};
+    if (!scenario.network.qbit) cycle.push_back("price");
+    cycle.push_back("global");
+    if (scenario.hasPool) cycle.push_back("pool");
+    const int cycle_len = (int) cycle.size();
     int current = 0;
     bool screen_on = true;
 
@@ -130,6 +136,10 @@ int run_window(UI &ui, SimScenario &scenario, const std::string &scenario_path, 
                 if (screen_on) current = (current + 1) % cycle_len;
                 screen_on = true;
                 show(DisplayDriver::screenByName(ui, cycle[current]));
+                if (!strcmp(cycle[current], "pool")) {
+                    QbitScreens::fillPoolScreen(ui, scenario.pool);
+                    lv_refr_now(nullptr);
+                }
                 break;
             case SDLK_2:
                 screen_on = !screen_on;
@@ -232,8 +242,12 @@ int main(int argc, char **argv)
     int failures = 0;
     for (const char *const *n = DisplayDriver::screenNames(); *n; n++) {
         if (!only_screen.empty() && only_screen != *n) continue;
+        bool pool = !strcmp(*n, "pool"), toast = !strcmp(*n, "toast");
+        if ((pool && !scenario.hasPool) || (toast && !scenario.hasToast)) continue;
         lv_obj_t *screen = DisplayDriver::screenByName(ui, *n);
         if (!screen) continue;
+        if (pool) QbitScreens::fillPoolScreen(ui, scenario.pool);
+        if (toast) QbitScreens::showBlockToast(ui, scenario.toast);
         show(screen);
         int s = scale > 0 ? scale : 2;
         std::vector<uint8_t> rgb = framebuffer_rgb(s);
@@ -244,6 +258,7 @@ int main(int argc, char **argv)
             continue;
         }
         printf("%s\n", path.c_str());
+        if (toast) QbitScreens::hideBlockToast(ui);
     }
 
     lv_mem_monitor_t mon;

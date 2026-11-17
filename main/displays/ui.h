@@ -90,6 +90,11 @@ protected:
     lv_obj_t *ui_qbitUnitMask = nullptr;
     lv_obj_t *ui_qbitUnit = nullptr;
     lv_obj_t *ui_qbitStepMask = nullptr;
+    lv_obj_t *ui_qbitPayoutBanner = nullptr;
+    lv_obj_t *ui_qbitPayoutText = nullptr;
+    lv_obj_t *ui_qbitPoolScreen = nullptr; // created while shown
+    struct QbitPoolWidgets *ui_qbitPool = nullptr;
+    lv_obj_t *ui_qbitBlockToast = nullptr;
 
     Board* m_board;
     Theme* m_theme;

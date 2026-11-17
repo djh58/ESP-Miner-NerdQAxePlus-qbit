@@ -1,5 +1,7 @@
 #pragma once
 
+#include <atomic>
+
 //#include "../global_state.h"
 
 #include "../boards/board.h"
@@ -81,6 +83,7 @@ class DisplayDriver {
         SettingsScreen,
         BTCScreen,
         GlobalStats,
+        QbitPool, // qbit edition: created on entry, deleted after leaving
         ShowQR,
         Identify,
         PowerOff,
@@ -132,6 +135,12 @@ class DisplayDriver {
     void enableLvglAnimations(bool enable);
 
     void updateBTCprice(void);
+
+    int64_t m_payoutCheckedUs = 0;
+    int64_t m_toastUntilUs = 0;
+    std::atomic<bool> m_remoteButton1{false};
+    void updateQbitPool(void);
+    void updatePayoutWarning(void);
 
     // Display-related functions
     bool displayTurnOff();         // Turn off the display
@@ -194,6 +203,12 @@ class DisplayDriver {
     void updateIpAddress(const char *ipAddressStr);                 // Update the displayed IP address
     void showFoundBlockOverlay();
     void updateGlobalState(int pool);                               // Update the global state on the display
+
+    // qbit edition remote control (/api/v2/display): press the first button,
+    // and render the active screen into a new PSRAM buffer of width*height
+    // RGB565 pixels (free with FREE); nullptr when it cannot.
+    void pressButton1Remotely();
+    lv_color_t *snapshot(uint16_t *width, uint16_t *height);
     void updateCurrentSettings(int pool);                           // Update the current settings screen
     void refreshScreen();                                           // Refresh the display
     void logMessage(const char *message);                           // Log a message to the display

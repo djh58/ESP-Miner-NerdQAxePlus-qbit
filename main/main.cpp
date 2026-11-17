@@ -58,6 +58,7 @@ HashrateMonitor HASHRATE_MONITOR;
 
 StratumManager *STRATUM_MANAGER = nullptr;
 APIsFetcher APIs_FETCHER;
+QbitPoolFetcher QBIT_POOL;
 FactoryOTAUpdate FACTORY_OTA_UPDATER;
 
 DiscordAlerter discordAlerter;
@@ -416,6 +417,7 @@ extern "C" void app_main(void)
             xTaskCreatePSRAM(ASIC_result_task, "asic result", 8192, NULL, 15, NULL);
             xTaskCreatePSRAM(influx_task, "influx", 8192, NULL, 1, NULL);
             xTaskCreatePSRAM(APIs_FETCHER.taskWrapper, "apis ticker", 8192, (void *) &APIs_FETCHER, 5, NULL);
+            xTaskCreatePSRAM(QBIT_POOL.taskWrapper, "qbit pool", 8192, (void *) &QBIT_POOL, 4, NULL);
             xTaskCreatePSRAM(wifi_monitor_task, "wifi monitor", 4096, NULL, 1, NULL);
             // only with CAN hardware: on the NerdQAxe family the CAN pins are shared
             // with the ethernet HAT

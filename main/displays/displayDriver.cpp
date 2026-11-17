@@ -339,7 +339,7 @@ bool DisplayDriver::enterState(UiState s, int64_t now)
         ESP_LOGI(TAG, "enter state mining");
         if (m_ui->ui_Splash2) { lv_obj_clean(m_ui->ui_Splash2); m_ui->ui_Splash2 = NULL; }
         enableLvglAnimations(true);
-        if (previousState == UiState::GlobalStats) {
+        if (previousState == UiState::GlobalStats || previousState == UiState::QbitPool) {
             safe_screen_change(m_ui->ui_MiningScreen, LV_SCR_LOAD_ANIM_MOVE_LEFT, 350, 0);
         } else {
             safe_screen_change(m_ui->ui_MiningScreen, LV_SCR_LOAD_ANIM_FADE_ON, 500, 0);
@@ -363,6 +363,23 @@ bool DisplayDriver::enterState(UiState s, int64_t now)
         enableLvglAnimations(true);
         safe_screen_change(m_ui->ui_GlobalStats, LV_SCR_LOAD_ANIM_MOVE_LEFT, 350, 0);
         break;
+    case UiState::QbitPool: {
+        ESP_LOGI(TAG, "enter state qbit pool");
+        // LVGL's out-of-memory handler never returns, so check that the
+        // screen fits before building it and stay on mining if it does not.
+        lv_mem_monitor_t mon;
+        lv_mem_monitor(&mon);
+        if (!m_ui->ui_qbitPoolScreen && mon.free_biggest_size < 12 * 1024) {
+            ESP_LOGW(TAG, "not enough LVGL memory for the qbit pool screen (%u bytes)", (unsigned) mon.free_biggest_size);
+            m_state = previousState;
+            return enterState(UiState::Mining, now);
+        }
+        lv_obj_t *screen = QbitScreens::createPoolScreen(*m_ui);
+        QbitScreens::fillPoolScreen(*m_ui, QBIT_POOL.getView());
+        enableLvglAnimations(true);
+        safe_screen_change(screen, LV_SCR_LOAD_ANIM_MOVE_LEFT, 350, 0);
+        break;
+    }
     case UiState::ShowQR:
         ESP_LOGI(TAG, "enter qr state");
         enableLvglAnimations(true);
@@ -447,6 +464,14 @@ void DisplayDriver::updateState(int64_t now, bool btn1Press, bool btn2Press, boo
         }
         break;
     case UiState::GlobalStats:
+        if (ledControl(btn1Press, btn2Press)) {
+            break;
+        }
+        if (btn1Press) {
+            enterState(QBIT_POOL.active() ? UiState::QbitPool : UiState::Mining, now);
+        }
+        break;
+    case UiState::QbitPool:
         if (ledControl(btn1Press, btn2Press)) {
             break;
         }
@@ -671,6 +696,10 @@ void DisplayDriver::lvglTimerTask(void *param)
         // --- Handle buttons ---
         bool btn1Press = false, btn2Press = false, btnBothLongPress = false;
         processButtons(btn1, btn2, tnow, btn1Press, btn2Press, btnBothLongPress);
+        if (m_remoteButton1.exchange(false)) {
+            btn1Press = true;
+            m_lastKeypressTime = tnow;
+        }
 
         // animation is running, ignore buttons
         if (m_screenAnimationRunning) {
@@ -964,6 +993,83 @@ void DisplayDriver::updateGlobalMiningStats(void)
     QbitScreens::fillGlobalStats(*m_ui, APIs_FETCHER.getStats());
 }
 
+void DisplayDriver::updatePayoutWarning(void)
+{
+    int64_t now = esp_timer_get_time();
+    if (m_payoutCheckedUs != 0 && now - m_payoutCheckedUs < 60LL * 1000000) {
+        return;
+    }
+    m_payoutCheckedUs = now;
+
+    char *user = Config::getStratumUser();
+    char *url = Config::getStratumURL();
+    char *fallbackUser = Config::getStratumFallbackUser();
+    char *fallbackUrl = Config::getStratumFallbackURL();
+    qbit::PayoutCheck primary = qbit::check_stratum_user(user, url, Config::getStratumPortNumber());
+    qbit::PayoutCheck fallback = qbit::check_stratum_user(fallbackUser, fallbackUrl, Config::getStratumFallbackPortNumber());
+    free(user);
+    free(url);
+    free(fallbackUser);
+    free(fallbackUrl);
+
+    if (primary.reason[0]) {
+        ESP_LOGW(TAG, "pool payout address %s: %s", qbit::payout_status_name(primary.status), primary.reason);
+    }
+    if (fallback.reason[0]) {
+        ESP_LOGW(TAG, "backup pool payout address %s: %s", qbit::payout_status_name(fallback.status), fallback.reason);
+    }
+    QbitScreens::setPayoutWarning(*m_ui, primary, fallback);
+}
+
+void DisplayDriver::pressButton1Remotely()
+{
+    m_remoteButton1 = true;
+}
+
+lv_color_t *DisplayDriver::snapshot(uint16_t *width, uint16_t *height)
+{
+    PThreadGuard lock(m_lvglMutex);
+    lv_obj_t *screen = lv_scr_act();
+    if (!screen) {
+        return nullptr;
+    }
+    uint32_t size = lv_snapshot_buf_size_needed(screen, LV_IMG_CF_TRUE_COLOR);
+    lv_color_t *buf = (lv_color_t *) MALLOC(size);
+    if (!buf) {
+        return nullptr;
+    }
+    lv_img_dsc_t dsc;
+    if (lv_snapshot_take_to_buf(screen, LV_IMG_CF_TRUE_COLOR, &dsc, buf, size) != LV_RES_OK) {
+        FREE(buf);
+        return nullptr;
+    }
+    *width = dsc.header.w;
+    *height = dsc.header.h;
+    return buf;
+}
+
+void DisplayDriver::updateQbitPool(void)
+{
+    int64_t now = esp_timer_get_time();
+    if (m_state == UiState::QbitPool) {
+        QbitScreens::fillPoolScreen(*m_ui, QBIT_POOL.getView());
+    } else {
+        // Frees the screen once it is no longer shown or animating out.
+        QbitScreens::deletePoolScreen(*m_ui);
+    }
+
+    QbitPoolBlock block;
+    bool normalScreen = m_state == UiState::Mining || m_state == UiState::SettingsScreen || m_state == UiState::BTCScreen ||
+                        m_state == UiState::GlobalStats || m_state == UiState::QbitPool;
+    if (QBIT_POOL.takeNewBlock(&block) && m_displayIsOn && normalScreen && !m_foundBlockOverlay) {
+        QbitScreens::showBlockToast(*m_ui, block);
+        m_toastUntilUs = now + 8LL * 1000000;
+    }
+    if (m_ui->ui_qbitBlockToast && (now > m_toastUntilUs || !normalScreen)) {
+        QbitScreens::hideBlockToast(*m_ui);
+    }
+}
+
 void DisplayDriver::updateGlobalState(int pool)
 {
     PThreadGuard lock(m_lvglMutex);
@@ -973,6 +1079,9 @@ void DisplayDriver::updateGlobalState(int pool)
         return;
     if (m_ui->ui_SettingsScreen == NULL)
         return;
+
+    updatePayoutWarning();
+    updateQbitPool();
 
     // snprintf(strData, sizeof(strData), "%.0f", power_management->chip_temp);
     snprintf(strData, sizeof(strData), "%.0f", POWER_MANAGEMENT_MODULE.getChipTempMax());

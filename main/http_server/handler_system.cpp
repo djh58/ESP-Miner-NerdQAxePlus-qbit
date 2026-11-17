@@ -19,6 +19,19 @@
 #include "http_utils.h"
 
 #include "ping_task.h"
+#include "qbit_address.h"
+
+static void addPayoutCheck(JsonObject out, const char *user, const char *host, int port)
+{
+    qbit::PayoutCheck check = qbit::check_stratum_user(user, host, port);
+    out["status"] = qbit::payout_status_name(check.status);
+    if (check.status != qbit::PayoutStatus::NotApplicable && check.status != qbit::PayoutStatus::Invalid) {
+        out["network"] = qbit::network_name(check.network);
+    }
+    if (check.reason[0]) {
+        out["reason"] = check.reason;
+    }
+}
 
 static const char *TAG = "http_system";
 
@@ -388,6 +401,12 @@ esp_err_t GET_system_info(httpd_req_t *req)
     doc["fallbackStratumTLS"] = Config::isStratumFallbackTLS();
     doc["stratumProtocol"]    = Config::getStratumProtocol();
     doc["fallbackStratumProtocol"] = Config::getFallbackStratumProtocol();
+    // qbit edition: whether each pool's username is a payout address the qbit
+    // pool credits (additive; see main/qbit/qbit_address.h)
+    JsonObject payoutCheck = doc["payoutCheck"].to<JsonObject>();
+    addPayoutCheck(payoutCheck["primary"].to<JsonObject>(), stratumUser, stratumURL, Config::getStratumPortNumber());
+    addPayoutCheck(payoutCheck["fallback"].to<JsonObject>(), fallbackStratumUser, fallbackStratumURL,
+                   Config::getStratumFallbackPortNumber());
     doc["sv2AuthorityPubkey"] = sv2_auth;
     doc["fallbackSv2AuthorityPubkey"] = fb_sv2_auth;
     doc["sv2ChannelType"]     = Config::getSV2ChannelType();

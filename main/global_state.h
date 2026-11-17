@@ -13,6 +13,7 @@
 #include "stratum/stratum_manager_dual_pool.h"
 #include "stratum/stratum_manager_fallback.h"
 #include "tasks/apis_task.h"
+#include "tasks/qbit_pool_task.h"
 #include "network/network_manager.h"
 
 #include "boards/nerdqaxeplus.h"
@@ -28,6 +29,7 @@ extern HashrateMonitor HASHRATE_MONITOR;
 
 extern StratumManager *STRATUM_MANAGER;
 extern APIsFetcher APIs_FETCHER;
+extern QbitPoolFetcher QBIT_POOL;
 extern FactoryOTAUpdate FACTORY_OTA_UPDATER;
 
 extern AsicJobs asicJobs;
