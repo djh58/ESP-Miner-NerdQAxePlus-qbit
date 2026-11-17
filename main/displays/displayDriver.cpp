@@ -1040,23 +1040,9 @@ void DisplayDriver::pressButton1Remotely()
 lv_color_t *DisplayDriver::snapshot(uint16_t *width, uint16_t *height)
 {
     PThreadGuard lock(m_lvglMutex);
-    lv_obj_t *screen = lv_scr_act();
-    if (!screen) {
-        return nullptr;
-    }
-    uint32_t size = lv_snapshot_buf_size_needed(screen, LV_IMG_CF_TRUE_COLOR);
-    lv_color_t *buf = (lv_color_t *) MALLOC(size);
-    if (!buf) {
-        return nullptr;
-    }
-    lv_img_dsc_t dsc;
-    if (lv_snapshot_take_to_buf(screen, LV_IMG_CF_TRUE_COLOR, &dsc, buf, size) != LV_RES_OK) {
-        FREE(buf);
-        return nullptr;
-    }
-    *width = dsc.header.w;
-    *height = dsc.header.h;
-    return buf;
+    // This file includes the local lv_conf.h, which hides LVGL's snapshot
+    // API; QbitScreens sees the Kconfig LVGL configuration.
+    return QbitScreens::snapshot(lv_scr_act(), width, height);
 }
 
 void DisplayDriver::updateQbitPool(void)

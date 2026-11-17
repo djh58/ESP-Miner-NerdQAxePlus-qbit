@@ -40,4 +40,8 @@ class QbitScreens {
     // block (about every two minutes), with what this address earned from it.
     static void showBlockToast(UI &ui, const QbitPoolBlock &block);
     static void hideBlockToast(UI &ui);
+
+    // Renders `screen` into a new PSRAM buffer of width*height pixels (free
+    // with FREE); nullptr when it cannot. Call with the LVGL lock held.
+    static lv_color_t *snapshot(lv_obj_t *screen, uint16_t *width, uint16_t *height);
 };

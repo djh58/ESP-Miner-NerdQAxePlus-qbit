@@ -3,6 +3,7 @@
 #include <cstdio>
 #include <cstring>
 
+#include "macros.h"
 #include "qbit_chain.h"
 
 LV_FONT_DECLARE(ui_font_OpenSansBold13);
@@ -297,7 +298,7 @@ void QbitScreens::fillPoolScreen(UI &ui, const QbitPoolView &v)
 {
     QbitPoolWidgets *w = ui.ui_qbitPool;
     if (!w) return;
-    char str[96], a[24], b[24];
+    char str[160], a[24], b[24];
 
     if (v.poolKnown) {
         const char *unit = "";
@@ -324,7 +325,7 @@ void QbitScreens::fillPoolScreen(UI &ui, const QbitPoolView &v)
         if (!v.worker[0]) {
             setText(w->worker, "#9A9A9A no worker name in the username#");
         } else if (!v.miner.workerFound) {
-            snprintf(str, sizeof(str), "#E600DE %s# #FF5050 not seen by the pool#", v.worker);
+            snprintf(str, sizeof(str), "#E600DE %.16s# #FF5050 not seen by the pool#", v.worker);
             setText(w->worker, str);
         } else {
             const char *unit = "";
@@ -334,9 +335,9 @@ void QbitScreens::fillPoolScreen(UI &ui, const QbitPoolView &v)
             double workerShare = (v.poolKnown && v.pool.hashrateThs > 0) ? v.miner.workerHashrateThs / v.pool.hashrateThs : 0;
             if (blocksPerDay > 0 && perBlockToMiners > 0 && workerShare > 0) {
                 formatApproxQbt(perBlockToMiners * workerShare * blocksPerDay, b, sizeof(b));
-                snprintf(str, sizeof(str), "#E600DE %s# %s %s at pool, ~%s QBT/day", v.worker, a, unit, b);
+                snprintf(str, sizeof(str), "#E600DE %.16s# %s %s at pool, ~%s QBT/day", v.worker, a, unit, b);
             } else {
-                snprintf(str, sizeof(str), "#E600DE %s# %s %s at pool", v.worker, a, unit);
+                snprintf(str, sizeof(str), "#E600DE %.16s# %s %s at pool", v.worker, a, unit);
             }
             setText(w->worker, str);
         }
@@ -355,8 +356,8 @@ void QbitScreens::fillPoolScreen(UI &ui, const QbitPoolView &v)
 
     // qb1zz2q6..tjuhax, last block #178869 2m ago
     size_t n = strlen(v.address);
-    if (n > 16) snprintf(a, sizeof(a), "%.8s..%s", v.address, v.address + n - 6);
-    else snprintf(a, sizeof(a), "%s", v.address);
+    if (n > 16) snprintf(a, sizeof(a), "%.8s..%.6s", v.address, v.address + n - 6);
+    else snprintf(a, sizeof(a), "%.16s", v.address);
     if (v.poolKnown) {
         formatAge(v.pool.latestBlockAgeSeconds + v.sinceFetchSeconds, b, sizeof(b));
         snprintf(str, sizeof(str), "%s  block #%lu %s", a, (unsigned long) v.pool.latestBlockHeight, b);
@@ -404,4 +405,20 @@ void QbitScreens::hideBlockToast(UI &ui)
     if (!ui.ui_qbitBlockToast) return;
     lv_obj_del(ui.ui_qbitBlockToast);
     ui.ui_qbitBlockToast = nullptr;
+}
+
+lv_color_t *QbitScreens::snapshot(lv_obj_t *screen, uint16_t *width, uint16_t *height)
+{
+    if (!screen) return nullptr;
+    uint32_t size = lv_snapshot_buf_size_needed(screen, LV_IMG_CF_TRUE_COLOR);
+    lv_color_t *buf = (lv_color_t *) MALLOC(size);
+    if (!buf) return nullptr;
+    lv_img_dsc_t dsc;
+    if (lv_snapshot_take_to_buf(screen, LV_IMG_CF_TRUE_COLOR, &dsc, buf, size) != LV_RES_OK) {
+        FREE(buf);
+        return nullptr;
+    }
+    *width = dsc.header.w;
+    *height = dsc.header.h;
+    return buf;
 }
